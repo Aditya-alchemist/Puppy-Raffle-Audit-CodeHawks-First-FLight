@@ -248,6 +248,44 @@ contract PuppyRaffleTest is Test {
         puppyRaffle.withdrawFees();
         assertEq(address(feeAddress).balance, expectedPrizeAmount);
     }
+  
+  //integer overflow test 
+function test_IntegerOverflow_TotalFees() public playersEntered {
+  
+    vm.warp(block.timestamp + duration + 1);
+    vm.roll(block.number + 1);
+
+    puppyRaffle.selectWinner();
+
+    uint256 feesAfterFirstRaffle = puppyRaffle.totalFees();
+    assert(feesAfterFirstRaffle > 0);
+
+   
+    uint256 playersNum = 89;
+    address[] memory players = new address[](playersNum);
+
+    for (uint256 i = 0; i < playersNum; i++) {
+        players[i] = address(i);
+    }
+
+    puppyRaffle.enterRaffle{value: entranceFee * playersNum}(players);
+
+    vm.warp(block.timestamp + duration + 1);
+    vm.roll(block.number + 1);
+
+    puppyRaffle.selectWinner();
+
+    uint256 feesAfterSecondRaffle = puppyRaffle.totalFees();
+
+    assert(feesAfterSecondRaffle < feesAfterFirstRaffle);
+
+    console.log("fees after first raffle :", feesAfterFirstRaffle);
+    console.log("fees after second raffle:", feesAfterSecondRaffle);
+
+    
+
+}
+
 
 
     //reentrancy 
